@@ -215,3 +215,6 @@ const double PARKING_PULLOUT_INCREMENT = 5.0;    // Spindle pull-out and plunge 
 
 // INCLUDE_OLED_BASIC includes a driver for a modest sized OLED display
 // #define INCLUDE_OLED_BASIC
+
+// Millisecond interval use for autoreporting of status information.
+const uint8_t AUTOREPORT_INTERVAL = 100;
