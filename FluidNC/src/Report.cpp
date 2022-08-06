@@ -731,13 +731,15 @@ void report_realtime_status(Channel& channel) {
 
 void autoreport_realtime_status(Channel& channel) {
     static int32_t next_report_time = xTaskGetTickCount();
+    static int32_t next_idle_report_time = xTaskGetTickCount();
 
-    if (AUTOREPORT_INTERVAL) {
-        if (sys.state != last_state || ((sys.state == State::Cycle || sys.state == State::Homing || sys.state == State::Jog) && (int32_t(xTaskGetTickCount()) - next_report_time) >= 0)) {
-            last_state = sys.state;
-            next_report_time = xTaskGetTickCount() + AUTOREPORT_INTERVAL;
-            report_realtime_status(channel);
-        }
+    if (sys.state != last_state || ((sys.state == State::Cycle || sys.state == State::Homing || sys.state == State::Jog) && (int32_t(xTaskGetTickCount()) - next_report_time) >= 0)) {
+        last_state = sys.state;
+        next_report_time = xTaskGetTickCount() + AUTOREPORT_INTERVAL;
+        report_realtime_status(channel);
+    } else if (AUTOREPORT_IDLE_INTERVAL && (int32_t(xTaskGetTickCount()) - next_idle_report_time) >= 0) {
+        next_idle_report_time = xTaskGetTickCount() + AUTOREPORT_IDLE_INTERVAL;
+        report_realtime_status(channel);
     }
 }
 

@@ -93,7 +93,11 @@ Channel* Channel::pollLine(char* line) {
             return this;
         }
     }
-    autoreport_realtime_status(*this);
+    
+    #ifdef AUTOREPORT
+        autoreport_realtime_status(*this);
+    #endif
+
     return nullptr;
 }
 
