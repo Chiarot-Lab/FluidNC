@@ -217,4 +217,4 @@ const double PARKING_PULLOUT_INCREMENT = 5.0;    // Spindle pull-out and plunge 
 // #define INCLUDE_OLED_BASIC
 
 // Millisecond interval use for autoreporting of status information.
-const uint8_t AUTOREPORT_INTERVAL = 100;
+const uint32_t AUTOREPORT_INTERVAL = 100;

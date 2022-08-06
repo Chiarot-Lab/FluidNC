@@ -45,6 +45,8 @@ EspClass esp;
 
 portMUX_TYPE mmux = portMUX_INITIALIZER_UNLOCKED;
 
+State last_state;
+
 void _notify(const char* title, const char* msg) {
     WebUI::notificationsService.sendMSG(title, msg);
 }
@@ -695,6 +697,19 @@ void report_realtime_status(Channel& channel) {
     channel << "|Heap:" << esp.getHeapSize();
 #endif
     channel << ">\n";
+}
+
+
+void autoreport_realtime_status(Channel& channel) {
+    static int32_t next_report_time = xTaskGetTickCount();
+
+    if (AUTOREPORT_INTERVAL) {
+        if (sys.state != last_state || ((sys.state == State::Cycle || sys.state == State::Homing || sys.state == State::Jog) && (int32_t(xTaskGetTickCount()) - next_report_time) >= 0)) {
+            last_state = sys.state;
+            next_report_time = xTaskGetTickCount() + AUTOREPORT_INTERVAL;
+            report_realtime_status(channel);
+        }
+    }
 }
 
 void hex_msg(uint8_t* buf, const char* prefix, int len) {
