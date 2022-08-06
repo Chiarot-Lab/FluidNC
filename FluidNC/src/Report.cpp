@@ -585,6 +585,13 @@ static void pinString(Print& channel) {
 // requires as it minimizes the computational overhead to keep running smoothly,
 // especially during g-code programs with fast, short line segments and high frequency reports (5-20Hz).
 void report_realtime_status(Channel& channel) {
+    static int32_t last_report = xTaskGetTickCount();
+    static float last_mpos[MAX_N_AXIS] = {0};
+    static float speed[MAX_N_AXIS] = {0};
+
+    int32_t time_since_last = xTaskGetTickCount() - last_report;
+    last_report = xTaskGetTickCount();
+
     channel << "<" << state_name();
 
     // Report position
@@ -596,6 +603,28 @@ void report_realtime_status(Channel& channel) {
         mpos_to_wpos(print_position);
     }
     report_util_axis_values(print_position, channel);
+
+    // Does a rough calculation for speed of each axis based on time b/w reporting calls
+    switch(sys.state) {
+        case State::Cycle:
+        case State::Jog:
+        case State::Homing:
+            {
+                if (time_since_last > 0) {
+                    for (size_t idx = 0; idx < MAX_N_AXIS; idx ++) {
+                        speed[idx] = abs(last_mpos[idx] - print_position[idx]) / (time_since_last / 1000.0);
+                        last_mpos[idx] = print_position[idx];
+                    }
+                }
+            }
+            break;
+        default:
+            std::fill(speed, speed+MAX_N_AXIS, 0);
+            break;
+    }
+    channel << "|Speed:";
+    report_util_axis_values(speed, channel);
+
 
     // Returns planner and serial read buffer states.
 
