@@ -592,7 +592,7 @@ void report_realtime_status(Channel& channel) {
     int32_t time_since_last = xTaskGetTickCount() - last_report;
     last_report = xTaskGetTickCount();
 
-    channel << "<" << state_name();
+    channel << "<Status:" << state_name();
 
     // Report position
     float* print_position = get_mpos();
